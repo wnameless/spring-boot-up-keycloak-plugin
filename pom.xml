@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.1.3</version>
+    <relativePath /> <!-- lookup parent from repository -->
+  </parent>
+
+  <groupId>com.github.wnameless.spring.boot.up</groupId>
+  <artifactId>spring-boot-up-keycloak-plugin</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <name>spring-boot-up-keycloak-plugin</name>
+  <description>Spring security plugin of standalone authentication total solution powered by Embedded Keycloak</description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:wnameless/spring-boot-up-keycloak-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:wnameless/spring-boot-up-keycloak-plugin.git</developerConnection>
+    <url>git@github.com:wnameless/spring-boot-up-keycloak-plugin.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>wnameless</id>
+      <name>Wei-Ming Wu</name>
+      <email>wnameless@gmail.com</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <java.version>17</java.version>
+  </properties>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <name>OSSRH Nexus Repository</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <name>Sonatype Nexus Staging</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>ossrh</id>
+      <name>OSSRH Nexus Repository</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+    <repository>
+      <id>Shibbolet</id>
+      <name>Shibbolet</name>
+      <url>https://build.shibboleth.net/nexus/content/repositories/releases/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.76</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.wnameless.spring.boot.up</groupId>
+      <artifactId>spring-boot-up-embedded-keycloak</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-saml2-service-provider</artifactId>
+      <version>6.1.3</version>
+    </dependency>
+
+    <!-- Test -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>
+            com.github.wnameless.spring.boot.up.plugin.keycloak.bootstrap.KeycloakRealmBootstrap
+          </mainClass>
+          <systemProperties>
+            <systemProperty>
+              <key>targetDir</key>
+              <value>${project.build.sourceDirectory}/../resources</value>
+            </systemProperty>
+          </systemProperties>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
