@@ -134,6 +134,10 @@
               <key>targetDir</key>
               <value>${project.build.sourceDirectory}/../resources</value>
             </systemProperty>
+            <!-- <systemProperty>
+              <key>configPackage</key>
+              <value>com.github.wnameless.spring.boot.up.plugin.keycloak.security</value>
+            </systemProperty> -->
           </systemProperties>
         </configuration>
       </plugin>

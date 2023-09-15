@@ -2,9 +2,12 @@ package com.github.wnameless.spring.boot.up.plugin.keycloak.bootstrap;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 import com.google.common.base.Strings;
 
 public class KeycloakRealmBootstrap {
@@ -26,13 +29,6 @@ public class KeycloakRealmBootstrap {
     }
     LOG.info("Base Dir: " + baseDir);
 
-    String realmName = System.getProperty("realmName");
-    if (Strings.isNullOrEmpty(realmName)) realmName = "webmvc";
-    LOG.info("Realm Name: " + realmName);
-    String clientId = System.getProperty("clientId");
-    if (Strings.isNullOrEmpty(clientId)) clientId = "webmvc-app";
-    LOG.info("Client ID: " + clientId);
-
     if (new File(baseDir + "/" + REALM_JSON).exists()) {
       LOG.warn("Bootstrap stopping: " + baseDir + "/" + REALM_JSON + " is already existed");
       return;
@@ -49,6 +45,37 @@ public class KeycloakRealmBootstrap {
       LOG.warn("Bootstrap stopping: " + baseDir + "/" + SERVER_CERT + " is already existed");
       return;
     }
+
+    String configPackage = System.getProperty("configPackage");
+    if (!Strings.isNullOrEmpty(configPackage)) {
+      String configPackagePath = configPackage.replace('.', '/');
+      configPackagePath = PathUtils.joinPath(baseDir, "..", "java", configPackagePath);
+
+      if (new File(configPackagePath + "/KeycloakPluginSecurityConfig.java").exists()) {
+        LOG.warn("Bootstrap stopping: " + configPackagePath + "/KeycloakPluginSecurityConfig.java"
+            + " is already existed");
+        return;
+      }
+
+      ClassPathResource securityConfigTemplate =
+          new ClassPathResource("KeycloakPluginSecurityConfig.template");
+      String securityConfigJava =
+          new String(securityConfigTemplate.getInputStream().readAllBytes());
+      securityConfigJava = "package " + configPackage + ";\n" + securityConfigJava;
+      Files.createDirectories(Paths.get(configPackagePath));
+      try (FileWriter writer =
+          new FileWriter(configPackagePath + "/KeycloakPluginSecurityConfig.java")) {
+        LOG.info("Generating: " + configPackagePath + "/KeycloakPluginSecurityConfig.java");
+        writer.write(securityConfigJava);
+      }
+    }
+
+    String realmName = System.getProperty("realmName");
+    if (Strings.isNullOrEmpty(realmName)) realmName = "webmvc";
+    LOG.info("Realm Name: " + realmName);
+    String clientId = System.getProperty("clientId");
+    if (Strings.isNullOrEmpty(clientId)) clientId = "webmvc-app";
+    LOG.info("Client ID: " + clientId);
 
     SelfSignedX509Certificate app = new SelfSignedX509Certificate(clientId, 3650);
     SelfSignedX509Certificate keycloak = new SelfSignedX509Certificate(realmName, 3650);
