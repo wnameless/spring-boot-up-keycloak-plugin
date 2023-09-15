@@ -1,6 +1,6 @@
 {
   "id": "2ce1d4c1-2155-419a-8eb1-5f4060a44b41",
-  "realm": "webmvc",
+  "realm": "${realmName}",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -45,7 +45,7 @@
   "failureFactor": 30,
   "defaultRole": {
     "id": "9665b835-29a3-465d-b536-b1b088ca00c8",
-    "name": "default-roles-webmvc",
+    "name": "default-roles-${realmName}",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
@@ -115,13 +115,13 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/webmvc/account/",
+      "baseUrl": "/realms/${realmName}/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/webmvc/account/*"
+        "/realms/${realmName}/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -159,13 +159,13 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/webmvc/account/",
+      "baseUrl": "/realms/${realmName}/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/webmvc/account/*"
+        "/realms/${realmName}/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -328,13 +328,13 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/webmvc/console/",
+      "baseUrl": "/admin/${realmName}/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/admin/webmvc/console/*"
+        "/admin/${realmName}/console/*"
       ],
       "webOrigins": [
         "+"
@@ -389,7 +389,7 @@
     },
     {
       "id": "be9d23dc-2a8f-4678-918e-b72b7267e92d",
-      "clientId": "webmvc-app",
+      "clientId": "${clientId}",
       "name": "",
       "description": "",
       "rootUrl": "",

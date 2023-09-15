@@ -1,6 +1,8 @@
 package com.github.wnameless.spring.boot.up.plugin.keycloak.config;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.Customizer;
@@ -33,61 +36,100 @@ import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilt
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import com.github.wnameless.spring.boot.up.embedded.keycloak.config.EnableEmbeddedKeycloak;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
+import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 
 @ConditionalOnBean(annotation = {EnableKeycloakPlugin.class, Configuration.class})
+@EnableEmbeddedKeycloak
 @EnableWebSecurity
 @Configuration
 public class KeycloakPluginSecurityConfig {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakPluginSecurityConfig.class);
 
-  @Value("${keycloak.base.url:http://localhost:8080}")
-  String keycloakBaseUrl;
+  @Value("${server.ssl.enabled:false}")
+  boolean serverSslEnabled;
+  @Value("${server.port:8080}")
+  int serverPort;
+
+  @Value("${keycloak.plugin.baseUrl:}")
+  String keycloakPluginBaseUrl;
+  @Value("${keycloak.plugin.realmName:webmvc}")
+  String realmName;
+  @Value("${keycloak.plugin.clientId:webmvc-app}")
+  String clientId;
+  @Value("${keycloak.plugin.serverCertPem:keycloak_certificate.pem}")
+  String serverCert;
+  @Value("${keycloak.plugin.appCertPem:app_certificate.pem}")
+  String appCert;
+  @Value("${keycloak.plugin.appPrivateKeyPem:app_private_key.pem}")
+  String appPK;
 
   @Autowired
   KeycloakServerProperties keycloakServerProperties;
 
   @Bean
-  public WebSecurityCustomizer webSecurityCustomizer(KeycloakServerProperties props) {
-    return (web) -> web.ignoring()
-        .requestMatchers(new AntPathRequestMatcher(props.getContextPath() + "/**"));
+  WebSecurityCustomizer webSecurityCustomizer(KeycloakServerProperties props) {
+    return (web) -> web.ignoring().requestMatchers(
+        new AntPathRequestMatcher(PathUtils.joinPath(props.getContextPath(), "/**")));
   }
 
   static {
     OpenSamlInitializationService.initialize();
   }
 
+  String getHostName() throws UnknownHostException {
+    return InetAddress.getLoopbackAddress().getHostName();
+  }
+
+  String getBaseUrl() {
+    if (!keycloakPluginBaseUrl.isBlank()) {
+      LOG.info("Keycloak plugin base URL: " + keycloakPluginBaseUrl);
+      return keycloakPluginBaseUrl;
+    }
+
+    try {
+      String protocolSchema = serverSslEnabled ? "https" : "http";
+      return protocolSchema + "://" + getHostName() + ":" + serverPort;
+    } catch (UnknownHostException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Lazy
   @Bean
   RelyingPartyRegistrationRepository relyingPartyRegistrations() {
     PrivateKey webmvcPK = loadWebmvPK();
     X509Certificate webmvcCert = loadWebmvCert();
     X509Certificate keycloakCert = loadKeycloakCert();
+    String baseUrl = getBaseUrl();
     RelyingPartyRegistration registration = RelyingPartyRegistration //
-        .withRegistrationId("webmvc") //
-        .entityId("webmvc-app") //
+        .withRegistrationId(realmName) //
+        .entityId(clientId) //
         .signingX509Credentials((c) -> c.add(Saml2X509Credential.signing(webmvcPK, webmvcCert)))
         .decryptionX509Credentials(
             (c) -> c.add(Saml2X509Credential.decryption(webmvcPK, webmvcCert)))
         .assertingPartyDetails((details) -> {
-          details.entityId(
-              keycloakBaseUrl + keycloakServerProperties.getContextPath() + "/realms/webmvc");
-          details.singleSignOnServiceLocation(keycloakBaseUrl
-              + keycloakServerProperties.getContextPath() + "/realms/webmvc/protocol/saml");
-          details.singleLogoutServiceLocation(keycloakBaseUrl
-              + keycloakServerProperties.getContextPath() + "/realms/webmvc/protocol/saml");
-          details
-              .encryptionX509Credentials(c -> c.add(Saml2X509Credential.encryption(keycloakCert)));
+          details.entityId(PathUtils.joinPath(baseUrl, keycloakServerProperties.getContextPath(),
+              "/realms/" + realmName));
+          details.singleSignOnServiceLocation(
+              PathUtils.joinPath(baseUrl, keycloakServerProperties.getContextPath(),
+                  "/realms/" + realmName + "/protocol/saml"));
+          details.singleLogoutServiceLocation(
+              PathUtils.joinPath(baseUrl, keycloakServerProperties.getContextPath(),
+                  "/realms/" + realmName + "/protocol/saml"));
+          details.encryptionX509Credentials(
+              (c) -> c.add(Saml2X509Credential.encryption(keycloakCert)));
           details.verificationX509Credentials(
-              c -> c.add(Saml2X509Credential.verification(keycloakCert)));
+              (c) -> c.add(Saml2X509Credential.verification(keycloakCert)));
           details.wantAuthnRequestsSigned(true);
         }).build();
     return new InMemoryRelyingPartyRegistrationRepository(registration);
   }
 
-  private X509Certificate loadKeycloakCert() {
-    Resource keystoreRes = new ClassPathResource("keycloak_certificate.pem");
+  X509Certificate loadKeycloakCert() {
+    Resource keystoreRes = new ClassPathResource(serverCert);
     try (var localByteArrayInputStream = keystoreRes.getInputStream()) {
       CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
       X509Certificate localX509Certificate =
@@ -95,13 +137,13 @@ public class KeycloakPluginSecurityConfig {
       localByteArrayInputStream.close();
       return localX509Certificate;
     } catch (CertificateException | IOException e) {
-      LOG.error("Classpath: keycloak_certificate.pem NOT found", e);
+      LOG.error("Classpath: " + serverCert + " NOT found", e);
       throw new RuntimeException(e);
     }
   }
 
-  private PrivateKey loadWebmvPK() {
-    Resource pkRes = new ClassPathResource("app_private_key.pem");
+  PrivateKey loadWebmvPK() {
+    Resource pkRes = new ClassPathResource(appPK);
     String pkPem;
     try {
       pkPem = new String(pkRes.getInputStream().readAllBytes())
@@ -112,13 +154,13 @@ public class KeycloakPluginSecurityConfig {
       KeyFactory keyFactory = KeyFactory.getInstance("RSA"); // or "EC" for elliptic curve keys
       return keyFactory.generatePrivate(keySpec);
     } catch (Exception e) {
-      LOG.error("Classpath: app_private_key.pem NOT found", e);
+      LOG.error("Classpath: " + appPK + " NOT found", e);
       throw new RuntimeException(e);
     }
   }
 
-  private X509Certificate loadWebmvCert() {
-    Resource keystoreRes = new ClassPathResource("app_certificate.pem");
+  X509Certificate loadWebmvCert() {
+    Resource keystoreRes = new ClassPathResource(appCert);
     try (var localByteArrayInputStream = keystoreRes.getInputStream()) {
       CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
       X509Certificate localX509Certificate =
@@ -126,14 +168,14 @@ public class KeycloakPluginSecurityConfig {
       localByteArrayInputStream.close();
       return localX509Certificate;
     } catch (CertificateException | IOException e) {
-      LOG.error("Classpath: app_certificate.pem NOT found", e);
+      LOG.error("Classpath: " + appCert + " NOT found", e);
       throw new RuntimeException(e);
     }
   }
 
+  @Lazy
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http,
-      HandlerMappingIntrospector introspector) throws Exception {
+  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     RelyingPartyRegistrationResolver relyingPartyRegistrationResolver =
         new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrations());
     Saml2MetadataFilter metadataFilter =
@@ -143,7 +185,7 @@ public class KeycloakPluginSecurityConfig {
 			.authorizeHttpRequests((authorize) -> authorize
 				.anyRequest().authenticated()
 			)
-     .saml2Login(Customizer.withDefaults())
+      .saml2Login(Customizer.withDefaults())
 			.saml2Logout(Customizer.withDefaults())
 			.addFilterBefore(metadataFilter, Saml2WebSsoAuthenticationFilter.class);
 		// @formatter:on 
