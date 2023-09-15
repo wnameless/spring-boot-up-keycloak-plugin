@@ -33,7 +33,6 @@ public class KeycloakRealmBootstrap {
     if (Strings.isNullOrEmpty(clientId)) clientId = "webmvc-app";
     LOG.info("Client ID: " + clientId);
 
-
     if (new File(baseDir + "/" + REALM_JSON).exists()) {
       LOG.warn("Bootstrap stopping: " + baseDir + "/" + REALM_JSON + " is already existed");
       return;
