@@ -44,9 +44,10 @@ import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 @EnableEmbeddedKeycloak
 @EnableWebSecurity
 @Configuration
-public class KeycloakPluginSecurityConfig {
+public class DefaultKeycloakPluginSecurityConfig {
 
-  private static final Logger LOG = LoggerFactory.getLogger(KeycloakPluginSecurityConfig.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DefaultKeycloakPluginSecurityConfig.class);
 
   @Value("${server.ssl.enabled:false}")
   boolean serverSslEnabled;

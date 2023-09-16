@@ -12,5 +12,5 @@ import org.springframework.context.annotation.Import;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Import(KeycloakPluginSecurityConfig.class)
+@Import(DefaultKeycloakPluginSecurityConfig.class)
 public @interface EnableKeycloakPlugin {}

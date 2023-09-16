@@ -40,7 +40,6 @@ import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServ
 import com.github.wnameless.spring.boot.up.plugin.keycloak.config.EnableKeycloakPlugin;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 
-@ConditionalOnBean(annotation = {EnableKeycloakPlugin.class, Configuration.class})
 @EnableEmbeddedKeycloak
 @EnableWebSecurity
 @Configuration
