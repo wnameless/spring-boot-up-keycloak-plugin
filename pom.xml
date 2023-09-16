@@ -130,11 +130,11 @@
             com.github.wnameless.spring.boot.up.plugin.keycloak.bootstrap.KeycloakRealmBootstrap
           </mainClass>
           <systemProperties>
-            <systemProperty>
+            <!-- <systemProperty>
               <key>targetDir</key>
               <value>${project.build.sourceDirectory}/../resources</value>
             </systemProperty>
-            <!-- <systemProperty>
+            <systemProperty>
               <key>configPackage</key>
               <value>com.github.wnameless.spring.boot.up.plugin.keycloak.security</value>
             </systemProperty> -->
