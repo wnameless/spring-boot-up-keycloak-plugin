@@ -13,7 +13,7 @@
 
   <groupId>com.github.wnameless.spring.boot.up</groupId>
   <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
 
   <name>spring-boot-up-keycloak-plugin</name>
   <description>Spring security plugin of standalone authentication total solution powered by Embedded Keycloak</description>
