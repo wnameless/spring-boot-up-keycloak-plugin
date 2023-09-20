@@ -1,4 +1,4 @@
-package com.github.wnameless.spring.boot.up.plugin.keycloak.config;
+package com.github.wnameless.spring.boot.up;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -22,7 +21,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.saml2.core.OpenSamlInitializationService;
 import org.springframework.security.saml2.core.Saml2X509Credential;
@@ -36,18 +34,15 @@ import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilt
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import com.github.wnameless.spring.boot.up.embedded.keycloak.config.EnableEmbeddedKeycloak;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
+import com.github.wnameless.spring.boot.up.plugin.keycloak.config.EnableKeycloakPlugin;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 
-@ConditionalOnBean(annotation = {EnableKeycloakPlugin.class})
-@EnableEmbeddedKeycloak
-@EnableWebSecurity
+@EnableKeycloakPlugin
 @Configuration
-public class DefaultKeycloakPluginSecurityConfig {
+public class KeycloakPluginSecurityConfig {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(DefaultKeycloakPluginSecurityConfig.class);
+  private static final Logger LOG = LoggerFactory.getLogger(KeycloakPluginSecurityConfig.class);
 
   @Value("${server.ssl.enabled:false}")
   boolean serverSslEnabled;
