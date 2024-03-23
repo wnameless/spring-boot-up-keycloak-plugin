@@ -13,7 +13,7 @@
 
   <groupId>com.github.wnameless.spring.boot.up</groupId>
   <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.2.23.0-SNAPSHOT</version>
 
   <name>spring-boot-up-keycloak-plugin</name>
   <description>Spring security plugin of standalone authentication total solution powered by Embedded Keycloak</description>
@@ -76,12 +76,12 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.76</version>
+      <version>1.77</version>
     </dependency>
     <dependency>
       <groupId>com.github.wnameless.spring.boot.up</groupId>
       <artifactId>spring-boot-up-embedded-keycloak</artifactId>
-      <version>3.0.0-SNAPSHOT</version>
+      <version>3.2.23.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -90,7 +90,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-saml2-service-provider</artifactId>
-      <version>6.1.3</version>
+      <version>6.2.3</version>
     </dependency>
 
     <!-- Test -->
