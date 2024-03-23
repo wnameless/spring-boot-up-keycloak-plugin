@@ -19,6 +19,7 @@ public class KeycloakRealmBootstrap {
   private static final String APP_CERT = "app_certificate.pem";
   private static final String SERVER_CERT = "keycloak_certificate.pem";
 
+  @SuppressWarnings("null")
   public static void main(String[] args) throws Exception {
     String targetDir = System.getProperty("targetDir");
     String baseDir = null;
