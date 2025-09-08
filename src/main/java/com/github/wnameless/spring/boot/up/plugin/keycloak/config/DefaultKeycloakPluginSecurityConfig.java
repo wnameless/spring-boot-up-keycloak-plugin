@@ -35,7 +35,6 @@ import org.springframework.security.saml2.provider.service.web.RelyingPartyRegis
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.EnableEmbeddedKeycloak;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
@@ -72,8 +71,8 @@ public class DefaultKeycloakPluginSecurityConfig {
 
   @Bean
   WebSecurityCustomizer webSecurityCustomizer(KeycloakServerProperties props) {
-    return (web) -> web.ignoring().requestMatchers(
-        new AntPathRequestMatcher(PathUtils.joinPath(props.getContextPath(), "/**")));
+    return (web) -> web.ignoring()
+        .requestMatchers(PathUtils.joinPath(props.getContextPath(), "/**"));
   }
 
   static {
