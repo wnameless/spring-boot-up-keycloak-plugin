@@ -69,8 +69,8 @@ public class KeycloakPluginSecurityConfig {
 
   @Bean
   WebSecurityCustomizer webSecurityCustomizer(KeycloakServerProperties props) {
-    return (web) -> web.ignoring().requestMatchers(
-        new AntPathRequestMatcher(PathUtils.joinPath(props.getContextPath(), "/**")));
+    return (web) -> web.ignoring()
+        .requestMatchers(PathUtils.joinPath(props.getContextPath(), "/**"));
   }
 
   static {
