@@ -416,7 +416,6 @@
       "attributes": {
         "saml.assertion.signature": "false",
         "saml.force.post.binding": "true",
-        "saml_single_logout_service_url_post": "/",
         "saml.encrypt": "false",
         "saml.server.signature": "true",
         "saml.server.signature.keyinfo.ext": "false",
