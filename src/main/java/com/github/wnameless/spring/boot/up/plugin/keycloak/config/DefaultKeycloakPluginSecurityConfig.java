@@ -35,12 +35,10 @@ import org.springframework.security.saml2.provider.service.web.RelyingPartyRegis
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import com.github.wnameless.spring.boot.up.embedded.keycloak.config.EnableEmbeddedKeycloak;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 
 @ConditionalOnBean(annotation = {EnableKeycloakPlugin.class})
-@EnableEmbeddedKeycloak
 @EnableWebSecurity
 @Configuration
 public class DefaultKeycloakPluginSecurityConfig {
