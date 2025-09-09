@@ -1,4 +1,4 @@
-package com.github.wnameless.spring.boot.up.web;
+package com.github.wnameless.spring.boot.up.keycloakconfig.web;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

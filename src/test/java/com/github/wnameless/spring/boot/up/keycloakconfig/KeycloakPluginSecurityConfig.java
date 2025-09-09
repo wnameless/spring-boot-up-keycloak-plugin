@@ -1,4 +1,4 @@
-package com.github.wnameless.spring.boot.up;
+package com.github.wnameless.spring.boot.up.keycloakconfig;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,6 +21,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.saml2.core.OpenSamlInitializationService;
 import org.springframework.security.saml2.core.Saml2X509Credential;
@@ -33,11 +34,12 @@ import org.springframework.security.saml2.provider.service.web.RelyingPartyRegis
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import com.github.wnameless.spring.boot.up.embedded.keycloak.config.EnableEmbeddedKeycloak;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
-import com.github.wnameless.spring.boot.up.plugin.keycloak.config.EnableKeycloakPlugin;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 
-@EnableKeycloakPlugin
+@EnableEmbeddedKeycloak
+@EnableWebSecurity
 @Configuration
 public class KeycloakPluginSecurityConfig {
 
