@@ -9,6 +9,7 @@ target/
 
 ### AI ###
 CLAUDE.md
+.claude/
 
 ### STS ###
 .apt_generated
