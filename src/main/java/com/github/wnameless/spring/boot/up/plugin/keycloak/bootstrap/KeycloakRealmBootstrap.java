@@ -10,6 +10,29 @@ import org.springframework.core.io.ClassPathResource;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 import com.google.common.base.Strings;
 
+/**
+ * Bootstrap utility for generating Keycloak realm configuration and certificates.
+ * 
+ * <p>This class provides a main method that generates necessary configuration files
+ * for setting up a Keycloak realm with SAML2 authentication, including:
+ * <ul>
+ *   <li>Keycloak realm JSON configuration</li>
+ *   <li>Application private key and certificate</li>
+ *   <li>Keycloak server certificate</li>
+ *   <li>Optional Spring Security configuration class</li>
+ * </ul>
+ * 
+ * <p>System properties can be used to customize the bootstrap process:
+ * <ul>
+ *   <li>targetDir - Target directory for generated files (default: ./src/main/resources)</li>
+ *   <li>configPackage - Java package for generated security config class</li>
+ *   <li>realmName - Name of the Keycloak realm (default: webmvc)</li>
+ *   <li>clientId - SAML client ID (default: webmvc-app)</li>
+ * </ul>
+ * 
+ * @author Wei-Ming Wu
+ * @since 1.0.0
+ */
 public class KeycloakRealmBootstrap {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakRealmBootstrap.class);
@@ -19,6 +42,15 @@ public class KeycloakRealmBootstrap {
   private static final String APP_CERT = "app_certificate.pem";
   private static final String SERVER_CERT = "keycloak_certificate.pem";
 
+  /**
+   * Main method that bootstraps Keycloak realm configuration.
+   * 
+   * <p>Generates all necessary files for Keycloak SAML2 authentication setup.
+   * Will skip generation if any of the target files already exist.
+   * 
+   * @param args command line arguments (not used)
+   * @throws Exception if any error occurs during file generation
+   */
   public static void main(String[] args) throws Exception {
     String targetDir = System.getProperty("targetDir");
     String baseDir = null;

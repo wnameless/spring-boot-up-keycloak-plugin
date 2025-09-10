@@ -6,10 +6,27 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Test controller for demonstrating authenticated access.
+ * 
+ * <p>This controller provides a simple index page that displays
+ * the authenticated user's name, demonstrating successful SAML2
+ * authentication through Keycloak.
+ * 
+ * @author Wei-Ming Wu
+ * @since 1.0.0
+ */
 @RequestMapping("/")
 @Controller
 public class MainController {
 
+  /**
+   * Displays the index page with the authenticated user's name.
+   * 
+   * @param model the Spring MVC model
+   * @param auth the authentication object containing user details
+   * @return the name of the view template to render
+   */
   @GetMapping
   String index(Model model, Authentication auth) {
     model.addAttribute("username", auth.getName());

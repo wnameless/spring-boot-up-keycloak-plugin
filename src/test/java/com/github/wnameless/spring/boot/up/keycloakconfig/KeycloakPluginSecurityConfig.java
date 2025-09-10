@@ -38,6 +38,24 @@ import com.github.wnameless.spring.boot.up.embedded.keycloak.config.EnableEmbedd
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
 
+/**
+ * Test security configuration for Keycloak SAML2 authentication.
+ * 
+ * <p>This class provides a complete SAML2 security configuration for testing
+ * purposes. It is similar to {@link com.github.wnameless.spring.boot.up.plugin.keycloak.config.DefaultKeycloakPluginSecurityConfig}
+ * but used specifically for test scenarios where manual configuration is needed.
+ * 
+ * <p>Features:
+ * <ul>
+ *   <li>Embedded Keycloak server configuration</li>
+ *   <li>SAML2 relying party registration</li>
+ *   <li>Certificate and key management</li>
+ *   <li>Security filter chain setup</li>
+ * </ul>
+ * 
+ * @author Wei-Ming Wu
+ * @since 1.0.0
+ */
 @EnableEmbeddedKeycloak
 @EnableWebSecurity
 @Configuration
