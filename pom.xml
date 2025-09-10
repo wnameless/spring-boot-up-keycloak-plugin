@@ -16,6 +16,7 @@
 
   <name>spring-boot-up-keycloak-plugin</name>
   <description>Spring security plugin of standalone authentication total solution powered by Embedded Keycloak</description>
+  <url>https://github.com/wnameless/spring-boot-up-keycloak-plugin</url>
 
   <licenses>
     <license>
