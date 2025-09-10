@@ -333,6 +333,34 @@ mvn spring-boot:run -Dstart-class=com.github.wnameless.spring.boot.up.keycloakan
 
 ## Troubleshooting
 
+### Liquibase Compatibility Issues
+
+If you encounter the following error after upgrading Spring Boot:
+```
+org.keycloak.services : 'boolean liquibase.lockservice.StandardLockService.isDatabaseChangeLogLockTableCreated()'
+```
+
+This is due to a version incompatibility between the Liquibase version used by Keycloak and the one provided by Spring Boot. To fix this issue, add an explicit Liquibase dependency with a compatible version (typically the newest version):
+
+```xml
+<dependency>
+    <groupId>org.liquibase</groupId>
+    <artifactId>liquibase-core</artifactId>
+    <version>4.33.0</version>
+</dependency>
+<dependency>
+    <groupId>com.github.wnameless.spring.boot.up</groupId>
+    <artifactId>spring-boot-up-keycloak-plugin</artifactId>
+    <version>3.24.0</version>
+</dependency>
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+</dependency>
+```
+
+The explicit Liquibase dependency ensures compatibility between Keycloak's embedded database migrations and Spring Boot's version management.
+
 ### Certificate Issues
 
 If you encounter certificate-related errors:

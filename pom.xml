@@ -188,6 +188,19 @@
           </systemProperties>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- Exclude generated test files from JAR -->
+            <exclude>**/keycloak-realm.json</exclude>
+            <exclude>**/app_private_key.pem</exclude>
+            <exclude>**/app_certificate.pem</exclude>
+            <exclude>**/keycloak_certificate.pem</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
