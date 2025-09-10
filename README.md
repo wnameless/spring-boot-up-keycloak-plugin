@@ -14,6 +14,17 @@ A Spring Boot plugin that provides a standalone authentication solution powered 
 - 📜 **Certificate Management** - Automatic X.509 certificate generation
 - 🔧 **Customizable** - Flexible configuration options
 
+## Version Numbering
+
+This library uses a 4-digit versioning scheme: `KEYCLOAK.SPRINGBOOT.MAJOR.MINOR`
+
+For example, version `24.3.0.0` means:
+- **24** - Keycloak major version
+- **3** - Spring Boot major version  
+- **0.0** - Library version (major.minor)
+
+This scheme makes it easy to identify compatibility at a glance, with Keycloak version first since it changes more frequently than Spring Boot.
+
 ## Requirements
 
 - Java 17 or higher
@@ -30,7 +41,7 @@ Add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.wnameless.spring.boot.up</groupId>
     <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-    <version>3.24.0</version>
+    <version>24.3.0.0</version>
 </dependency>
 ```
 
@@ -361,7 +372,7 @@ This is due to a version incompatibility between the Liquibase version used by K
 <dependency>
     <groupId>com.github.wnameless.spring.boot.up</groupId>
     <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-    <version>3.24.0</version>
+    <version>24.3.0.0</version>
 </dependency>
 <dependency>
     <groupId>com.h2database</groupId>
