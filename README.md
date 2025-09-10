@@ -75,6 +75,8 @@ Configure the plugin in your `application.properties` or `application.yml`:
 ```properties
 # Base URL for the application (optional, auto-detected if not set)
 keycloak.plugin.baseUrl=http://localhost:8080
+# Can also use dynamic property reference
+# keycloak.plugin.baseUrl=${app.url}
 
 # Keycloak realm name (default: webmvc)
 keycloak.plugin.realmName=webmvc
@@ -91,7 +93,15 @@ keycloak.plugin.appPrivateKeyPem=app_private_key.pem
 keycloak.server.contextPath=/auth
 keycloak.server.adminUser=admin
 keycloak.server.adminPassword=admin
+
+# Database configuration (optional, uses in-memory H2 by default)
+# To persist Keycloak data across restarts, use file-based H2:
+# keycloak.connectionsJpa.url=jdbc:h2:file:./keycloak-db;DB_CLOSE_DELAY=-1
 ```
+
+### Advanced Configuration
+
+This plugin is built on top of [spring-boot-up-embedded-keycloak](https://github.com/wnameless/spring-boot-up-embedded-keycloak). For additional configuration options and advanced settings, please refer to the embedded Keycloak documentation.
 
 ### Custom Security Configuration
 
