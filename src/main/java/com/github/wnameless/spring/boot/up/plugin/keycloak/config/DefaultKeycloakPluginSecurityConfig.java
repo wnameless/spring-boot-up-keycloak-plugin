@@ -26,7 +26,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.saml2.core.OpenSamlInitializationService;
 import org.springframework.security.saml2.core.Saml2X509Credential;
-import org.springframework.security.saml2.provider.service.metadata.OpenSamlMetadataResolver;
+import org.springframework.security.saml2.provider.service.metadata.OpenSaml4MetadataResolver;
 import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
@@ -108,20 +108,20 @@ public class DefaultKeycloakPluginSecurityConfig {
         .signingX509Credentials((c) -> c.add(Saml2X509Credential.signing(webmvcPK, webmvcCert)))
         .decryptionX509Credentials(
             (c) -> c.add(Saml2X509Credential.decryption(webmvcPK, webmvcCert)))
-        .assertingPartyDetails((details) -> {
-          details.entityId(PathUtils.joinPath(baseUrl, keycloakServerProperties.getContextPath(),
+        .assertingPartyMetadata((metadata) -> {
+          metadata.entityId(PathUtils.joinPath(baseUrl, keycloakServerProperties.getContextPath(),
               "/realms/" + realmName));
-          details.singleSignOnServiceLocation(
+          metadata.singleSignOnServiceLocation(
               PathUtils.joinPath(baseUrl, keycloakServerProperties.getContextPath(),
                   "/realms/" + realmName + "/protocol/saml"));
-          details.singleLogoutServiceLocation(
+          metadata.singleLogoutServiceLocation(
               PathUtils.joinPath(baseUrl, keycloakServerProperties.getContextPath(),
                   "/realms/" + realmName + "/protocol/saml"));
-          details.encryptionX509Credentials(
+          metadata.encryptionX509Credentials(
               (c) -> c.add(Saml2X509Credential.encryption(keycloakCert)));
-          details.verificationX509Credentials(
+          metadata.verificationX509Credentials(
               (c) -> c.add(Saml2X509Credential.verification(keycloakCert)));
-          details.wantAuthnRequestsSigned(true);
+          metadata.wantAuthnRequestsSigned(true);
         }).build();
     return new InMemoryRelyingPartyRegistrationRepository(registration);
   }
@@ -177,7 +177,7 @@ public class DefaultKeycloakPluginSecurityConfig {
     RelyingPartyRegistrationResolver relyingPartyRegistrationResolver =
         new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrations());
     Saml2MetadataFilter metadataFilter =
-        new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
+        new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSaml4MetadataResolver());
     // @formatter:off
 		http
 			.authorizeHttpRequests((authorize) -> authorize
