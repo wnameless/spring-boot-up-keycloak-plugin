@@ -46,7 +46,7 @@ public class KeycloakRealmBootstrap {
    * Main method that bootstraps Keycloak realm configuration.
    * 
    * <p>Generates all necessary files for Keycloak SAML2 authentication setup.
-   * Will skip generation if any of the target files already exist.
+   * Will skip generation of individual files if they already exist.
    * 
    * @param args command line arguments (not used)
    * @throws Exception if any error occurs during file generation
@@ -61,44 +61,25 @@ public class KeycloakRealmBootstrap {
     }
     LOG.info("Base Dir: " + baseDir);
 
-    if (new File(baseDir + "/" + REALM_JSON).exists()) {
-      LOG.warn("Bootstrap stopping: " + baseDir + "/" + REALM_JSON + " is already existed");
-      return;
-    }
-    if (new File(baseDir + "/" + APP_PK).exists()) {
-      LOG.warn("Bootstrap stopping: " + baseDir + "/" + APP_PK + " is already existed");
-      return;
-    }
-    if (new File(baseDir + "/" + APP_CERT).exists()) {
-      LOG.warn("Bootstrap stopping: " + baseDir + "/" + APP_CERT + " is already existed");
-      return;
-    }
-    if (new File(baseDir + "/" + SERVER_CERT).exists()) {
-      LOG.warn("Bootstrap stopping: " + baseDir + "/" + SERVER_CERT + " is already existed");
-      return;
-    }
-
     String configPackage = System.getProperty("configPackage");
     if (!Strings.isNullOrEmpty(configPackage)) {
       String configPackagePath = configPackage.replace('.', '/');
       configPackagePath = PathUtils.joinPath(baseDir, "..", "java", configPackagePath);
-
-      if (new File(configPackagePath + "/KeycloakPluginSecurityConfig.java").exists()) {
-        LOG.warn("Bootstrap stopping: " + configPackagePath + "/KeycloakPluginSecurityConfig.java"
-            + " is already existed");
-        return;
-      }
-
-      ClassPathResource securityConfigTemplate =
-          new ClassPathResource("KeycloakPluginSecurityConfig.template");
-      String securityConfigJava =
-          new String(securityConfigTemplate.getInputStream().readAllBytes());
-      securityConfigJava = "package " + configPackage + ";\n" + securityConfigJava;
-      Files.createDirectories(Paths.get(configPackagePath));
-      try (FileWriter writer =
-          new FileWriter(configPackagePath + "/KeycloakPluginSecurityConfig.java")) {
-        LOG.info("Generating: " + configPackagePath + "/KeycloakPluginSecurityConfig.java");
-        writer.write(securityConfigJava);
+      File configFile = new File(configPackagePath + "/KeycloakPluginSecurityConfig.java");
+      
+      if (configFile.exists()) {
+        LOG.warn("Skipping: " + configPackagePath + "/KeycloakPluginSecurityConfig.java already exists");
+      } else {
+        ClassPathResource securityConfigTemplate =
+            new ClassPathResource("KeycloakPluginSecurityConfig.template");
+        String securityConfigJava =
+            new String(securityConfigTemplate.getInputStream().readAllBytes());
+        securityConfigJava = "package " + configPackage + ";\n" + securityConfigJava;
+        Files.createDirectories(Paths.get(configPackagePath));
+        try (FileWriter writer = new FileWriter(configFile)) {
+          LOG.info("Generating: " + configPackagePath + "/KeycloakPluginSecurityConfig.java");
+          writer.write(securityConfigJava);
+        }
       }
     }
 
@@ -109,33 +90,75 @@ public class KeycloakRealmBootstrap {
     if (Strings.isNullOrEmpty(clientId)) clientId = "webmvc-app";
     LOG.info("Client ID: " + clientId);
 
-    SelfSignedX509Certificate app = new SelfSignedX509Certificate(clientId, 3650);
-    SelfSignedX509Certificate keycloak = new SelfSignedX509Certificate(realmName, 3650);
+    // Generate certificates only if needed
+    SelfSignedX509Certificate app = null;
+    SelfSignedX509Certificate keycloak = null;
+    
+    // Check which files need to be generated
+    boolean needAppCert = !new File(baseDir + "/" + APP_PK).exists() || 
+                         !new File(baseDir + "/" + APP_CERT).exists();
+    boolean needServerCert = !new File(baseDir + "/" + SERVER_CERT).exists();
+    boolean needRealmJson = !new File(baseDir + "/" + REALM_JSON).exists();
+    
+    // Generate certificates if any related files are needed
+    if (needAppCert || needRealmJson) {
+      app = new SelfSignedX509Certificate(clientId, 3650);
+    }
+    if (needServerCert || needRealmJson) {
+      keycloak = new SelfSignedX509Certificate(realmName, 3650);
+    }
 
-    ClassPathResource jsonTemplate =
-        new ClassPathResource("spring-boot-up-keycloak-plugin-realm-template.json");
-    String realmTemplate = new String(jsonTemplate.getInputStream().readAllBytes());
-    String realmJson =
-        String.format(realmTemplate, app.getTrimPrivateKeyPem(), app.getTrimCertificatePem(),
-            keycloak.getTrimPrivateKeyPem(), keycloak.getTrimCertificatePem());
-    realmJson = realmJson.replace("${realmName}", realmName);
-    realmJson = realmJson.replace("${clientId}", clientId);
-
-    try (FileWriter writer = new FileWriter(baseDir + "/" + REALM_JSON)) {
-      LOG.info("Generating: " + baseDir + "/" + REALM_JSON);
-      writer.write(realmJson);
+    // Generate realm JSON file
+    File realmJsonFile = new File(baseDir + "/" + REALM_JSON);
+    if (realmJsonFile.exists()) {
+      LOG.warn("Skipping: " + baseDir + "/" + REALM_JSON + " already exists");
+    } else {
+      ClassPathResource jsonTemplate =
+          new ClassPathResource("spring-boot-up-keycloak-plugin-realm-template.json");
+      String realmTemplate = new String(jsonTemplate.getInputStream().readAllBytes());
+      String realmJson =
+          String.format(realmTemplate, app.getTrimPrivateKeyPem(), app.getTrimCertificatePem(),
+              keycloak.getTrimPrivateKeyPem(), keycloak.getTrimCertificatePem());
+      realmJson = realmJson.replace("${realmName}", realmName);
+      realmJson = realmJson.replace("${clientId}", clientId);
+      
+      try (FileWriter writer = new FileWriter(realmJsonFile)) {
+        LOG.info("Generating: " + baseDir + "/" + REALM_JSON);
+        writer.write(realmJson);
+      }
     }
-    try (FileWriter writer = new FileWriter(baseDir + "/" + APP_PK)) {
-      LOG.info("Generating: " + baseDir + "/" + APP_PK);
-      writer.write(app.getPrivateKeyPem());
+    
+    // Generate application private key
+    File appPkFile = new File(baseDir + "/" + APP_PK);
+    if (appPkFile.exists()) {
+      LOG.warn("Skipping: " + baseDir + "/" + APP_PK + " already exists");
+    } else {
+      try (FileWriter writer = new FileWriter(appPkFile)) {
+        LOG.info("Generating: " + baseDir + "/" + APP_PK);
+        writer.write(app.getPrivateKeyPem());
+      }
     }
-    try (FileWriter writer = new FileWriter(baseDir + "/" + APP_CERT)) {
-      LOG.info("Generating: " + baseDir + "/" + APP_CERT);
-      writer.write(app.getCertificatePem());
+    
+    // Generate application certificate
+    File appCertFile = new File(baseDir + "/" + APP_CERT);
+    if (appCertFile.exists()) {
+      LOG.warn("Skipping: " + baseDir + "/" + APP_CERT + " already exists");
+    } else {
+      try (FileWriter writer = new FileWriter(appCertFile)) {
+        LOG.info("Generating: " + baseDir + "/" + APP_CERT);
+        writer.write(app.getCertificatePem());
+      }
     }
-    try (FileWriter writer = new FileWriter(baseDir + "/" + SERVER_CERT)) {
-      LOG.info("Generating: " + baseDir + "/" + SERVER_CERT);
-      writer.write(keycloak.getCertificatePem());
+    
+    // Generate server certificate
+    File serverCertFile = new File(baseDir + "/" + SERVER_CERT);
+    if (serverCertFile.exists()) {
+      LOG.warn("Skipping: " + baseDir + "/" + SERVER_CERT + " already exists");
+    } else {
+      try (FileWriter writer = new FileWriter(serverCertFile)) {
+        LOG.info("Generating: " + baseDir + "/" + SERVER_CERT);
+        writer.write(keycloak.getCertificatePem());
+      }
     }
   }
 

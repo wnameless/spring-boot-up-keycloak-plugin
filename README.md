@@ -257,7 +257,7 @@ The bootstrap process will generate the following files in the target directory:
 | `keycloak_certificate.pem` | Keycloak server's X.509 certificate |
 | `KeycloakPluginSecurityConfig.java` | (Optional) Spring Security configuration class |
 
-**Note**: The bootstrap will skip generation if any of the target files already exist to prevent accidental overwrites. Delete existing files if you need to regenerate them.
+**Note**: The bootstrap process will skip individual files that already exist to prevent accidental overwrites. Each file is checked independently, so the process will continue generating other files even if some already exist. To regenerate specific files, delete them first and run the bootstrap again.
 
 ## Usage Example
 
