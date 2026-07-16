@@ -18,8 +18,8 @@ A Spring Boot plugin that provides a standalone authentication solution powered 
 
 This library uses a 4-digit versioning scheme: `KEYCLOAK.SPRINGBOOT.MAJOR.MINOR`
 
-For example, version `24.3.0.0` means:
-- **24** - Keycloak major version
+For example, version `26.3.0.0` means:
+- **26** - Keycloak major version
 - **3** - Spring Boot major version  
 - **0.0** - Library version (major.minor)
 
@@ -41,8 +41,42 @@ Add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.wnameless.spring.boot.up</groupId>
     <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-    <version>24.3.0.0</version>
+    <version>26.3.0.0</version>
 </dependency>
+```
+
+Since version 26.3.0.0 (Keycloak 26.7), the embedded Keycloak server requires Hibernate ORM 7,
+Jakarta Persistence 3.2 and Infinispan 16. Spring Boot's parent BOM manages older versions of
+these libraries and Maven `dependencyManagement` is not transitive, so **every consuming project
+must repeat the following pins** in its own `pom.xml`:
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-bom</artifactId>
+      <version>16.0.12</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>7.2.14.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
+      <version>4.33.0</version>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
 ```
 
 ### 2. Enable the Plugin
@@ -372,7 +406,7 @@ This is due to a version incompatibility between the Liquibase version used by K
 <dependency>
     <groupId>com.github.wnameless.spring.boot.up</groupId>
     <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-    <version>24.3.0.0</version>
+    <version>26.3.0.0</version>
 </dependency>
 <dependency>
     <groupId>com.h2database</groupId>
