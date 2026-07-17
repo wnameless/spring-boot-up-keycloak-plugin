@@ -28,7 +28,7 @@ This scheme makes it easy to identify compatibility at a glance, with Keycloak v
 ## Requirements
 
 - Java 17 or higher
-- Spring Boot 3.5.5 or compatible version
+- Spring Boot 3.5.16 or compatible version
 - Maven 3.6+
 
 ## Quick Start
