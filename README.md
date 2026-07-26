@@ -16,14 +16,28 @@ A Spring Boot plugin that provides a standalone authentication solution powered 
 
 ## Version Numbering
 
-This library uses a 4-digit versioning scheme: `KEYCLOAK.SPRINGBOOT.MAJOR.MINOR`
+This library uses a 4-segment versioning scheme: `KEYCLOAK_MAJOR.KEYCLOAK_MINOR.SPRINGBOOT_MAJOR.RELEASE`
 
-For example, version `26.3.0.0` means:
-- **26** - Keycloak major version
-- **3** - Spring Boot major version  
-- **0.0** - Library version (major.minor)
+For example, version `26.7.3.0` means:
+- **26.7** - the embedded Keycloak version
+- **3** - the Spring Boot major version this line targets
+- **0** - the release counter for that platform combination
 
-This scheme makes it easy to identify compatibility at a glance, with Keycloak version first since it changes more frequently than Spring Boot.
+The platform *is* the compatibility signal for this library. Its own API surface is small and
+stable — an annotation and a handful of properties — so a breaking change almost always originates
+in Keycloak or Spring Boot rather than here. Putting both in the version makes compatibility
+readable at a glance, which a library-only scheme could not do.
+
+Segments compare numerically, so `26.10.3.0` sorts after `26.7.3.0`, and a fix backported to an
+older platform (`26.7.3.1`) still sorts before the next one (`26.8.3.0`). A future Spring Boot 4
+line is `26.8.4.0`.
+
+> **Changed in 26.7.3.0.** Earlier releases used `KEYCLOAK_MAJOR.SPRINGBOOT_MAJOR.MAJOR.MINOR`
+> (for example `24.3.0.0`). That scheme could not express a Keycloak minor upgrade — one version
+> number covered everything from Keycloak 26.3 to 26.7, even though 26.6 removed the Platform SPI
+> and 26.7 changed the required Hibernate and Infinispan lines — and it spent the second segment on
+> Spring Boot while reading like a library version. Versions still increase monotonically across
+> the change.
 
 Release history is kept in [CHANGELOG.md](CHANGELOG.md). This library is released in lockstep with [spring-boot-up-embedded-keycloak](https://github.com/wnameless/spring-boot-up-embedded-keycloak) — use the same version of both.
 
@@ -43,11 +57,11 @@ Add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.wnameless.spring.boot.up</groupId>
     <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-    <version>26.3.0.0</version>
+    <version>26.7.3.0</version>
 </dependency>
 ```
 
-Since version 26.3.0.0 (Keycloak 26.7), the embedded Keycloak server requires Hibernate ORM 7,
+Since version 26.7.3.0, the embedded Keycloak server requires Hibernate ORM 7,
 Jakarta Persistence 3.2 and Infinispan 16. Spring Boot's parent BOM manages older versions of
 these libraries and Maven `dependencyManagement` is not transitive, so **every consuming project
 must repeat the following pins** in its own `pom.xml`:
@@ -439,7 +453,7 @@ This is due to a version incompatibility between the Liquibase version used by K
 <dependency>
     <groupId>com.github.wnameless.spring.boot.up</groupId>
     <artifactId>spring-boot-up-keycloak-plugin</artifactId>
-    <version>26.3.0.0</version>
+    <version>26.7.3.0</version>
 </dependency>
 <dependency>
     <groupId>com.h2database</groupId>

@@ -4,8 +4,9 @@
 
 格式基於 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。
 
-本專案**不**採用語意化版本，而是使用 `KEYCLOAK.SPRINGBOOT.MAJOR.MINOR` 四段式版號 —— `26.3.0.0`
-表示 Keycloak 26 搭配 Spring Boot 3，函式庫版本 0.0。詳見 [README](README.md#version-numbering)。
+本專案**不**採用語意化版本，而是使用 `KEYCLOAK_MAJOR.KEYCLOAK_MINOR.SPRINGBOOT_MAJOR.RELEASE`
+四段式版號 —— `26.7.3.0` 表示內嵌 Keycloak 26.7、對應 Spring Boot 3 這條線的第 0 次發行。
+版號規則在 26.7.3.0 有所調整，詳見 [README](README.md#version-numbering)。
 
 本專案與 [spring-boot-up-embedded-keycloak](https://github.com/wnameless/spring-boot-up-embedded-keycloak)
 版本鎖步發行，兩者請使用相同版號；升級時請一併參閱該專案的更新日誌。
@@ -33,7 +34,12 @@ Infinispan 16 與 Liquibase 4.33，而 Spring Boot 的 parent BOM 管理的是�
 
 ### 變更
 
-- 升級至 spring-boot-up-embedded-keycloak 26.3.0.0（內嵌 Keycloak 26.7.0）
+- **版號規則調整**：由 `KEYCLOAK_MAJOR.SPRINGBOOT_MAJOR.MAJOR.MINOR`（例如 `24.3.0.0`）改為
+  `KEYCLOAK_MAJOR.KEYCLOAK_MINOR.SPRINGBOOT_MAJOR.RELEASE`。舊規則無法表達 Keycloak 次版本的升級
+  —— 同一個版號會涵蓋 Keycloak 26.3 到 26.7，但 26.6 移除了 Platform SPI、26.7 更換了所需的
+  Hibernate 與 Infinispan 版本 —— 而且第二碼實際上被 Spring Boot 佔用，卻長得像函式庫版本。
+  版號在規則變更前後仍然單調遞增
+- 升級至 spring-boot-up-embedded-keycloak 26.7.3.0（內嵌 Keycloak 26.7.0）
 - 升級至 Spring Boot 3.5.16 parent
 - 移除 `spring-security-saml2-service-provider` 的版本 pin，改由 Boot 匯入的 spring-security-bom
   管理。原本 pin 的 6.5.3 在 Boot 3.5.5 下與其他 Spring Security 模組一致，但升級後其餘模組移動到
