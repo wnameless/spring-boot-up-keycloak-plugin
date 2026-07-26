@@ -237,4 +237,37 @@
     </plugins>
   </build>
 
+  <profiles>
+    <!-- Release-only, so a plain `mvn deploy` of a SNAPSHOT cannot create a meaningless tag.
+         Publish with: mvn clean deploy -Prelease -->
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-scm-plugin</artifactId>
+            <version>2.2.1</version>
+            <configuration>
+              <tag>v${project.version}</tag>
+              <message>Release v${project.version}</message>
+            </configuration>
+            <executions>
+              <execution>
+                <id>tag-release</id>
+                <!-- Bound after central-publishing-maven-plugin within the deploy phase, so a
+                     failed upload never leaves a tag pointing at an unpublished version. The
+                     git provider pushes the tag as part of the goal. -->
+                <phase>deploy</phase>
+                <goals>
+                  <goal>tag</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
