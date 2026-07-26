@@ -25,6 +25,8 @@ For example, version `26.3.0.0` means:
 
 This scheme makes it easy to identify compatibility at a glance, with Keycloak version first since it changes more frequently than Spring Boot.
 
+Release history is kept in [CHANGELOG.md](CHANGELOG.md). This library is released in lockstep with [spring-boot-up-embedded-keycloak](https://github.com/wnameless/spring-boot-up-embedded-keycloak) — use the same version of both.
+
 ## Requirements
 
 - Java 17 or higher
@@ -129,20 +131,32 @@ keycloak.plugin.realmName=webmvc
 # SAML client ID (default: webmvc-app)
 keycloak.plugin.clientId=webmvc-app
 
-# Certificate paths (default values shown)
+# Certificate locations (default values shown)
 keycloak.plugin.serverCertPem=keycloak_certificate.pem
 keycloak.plugin.appCertPem=app_certificate.pem
 keycloak.plugin.appPrivateKeyPem=app_private_key.pem
 
 # Embedded Keycloak server settings
-keycloak.server.contextPath=/auth
-keycloak.server.adminUser=admin
-keycloak.server.adminPassword=admin
+keycloak.server.context-path=/auth
+keycloak.server.admin-user.username=admin
+keycloak.server.admin-user.password=admin
 
 # Database configuration (optional, uses in-memory H2 by default)
 # To persist Keycloak data across restarts, use file-based H2:
-# keycloak.connectionsJpa.url=jdbc:h2:file:./keycloak-db;DB_CLOSE_DELAY=-1
+# keycloak.connections-jpa.url=jdbc:h2:file:./keycloak-db;DB_CLOSE_DELAY=-1
 ```
+
+### Certificate Locations
+
+The three `keycloak.plugin.*Pem` properties accept three forms:
+
+| Value | Resolved from |
+|---|---|
+| `app_certificate.pem` | Classpath (the default) |
+| `classpath:certs/app_certificate.pem` | Classpath, explicit location |
+| `file:/etc/myapp/app_certificate.pem` | Filesystem, outside the packaged application |
+
+Use `file:` to keep the private key out of your application archive. A key packaged into the jar cannot be rotated without a rebuild and is distributed to everyone who receives that jar.
 
 ### Advanced Configuration
 
@@ -312,7 +326,17 @@ The bootstrap process will generate the following files in the target directory:
 | `keycloak_certificate.pem` | Keycloak server's X.509 certificate |
 | `KeycloakPluginSecurityConfig.java` | (Optional) Spring Security configuration class |
 
-**Note**: The bootstrap process will skip individual files that already exist to prevent accidental overwrites. Each file is checked independently, so the process will continue generating other files even if some already exist. To regenerate specific files, delete them first and run the bootstrap again.
+**Note**: `keycloak-realm.json` and the three `.pem` files are generated **all-or-nothing**. They share two RSA key pairs — the realm JSON embeds both, and each PEM holds one half — so they are only meaningful as a matching set:
+
+| State of the four files | What the bootstrap does |
+|---|---|
+| All four exist | Skips, leaving them untouched |
+| None exist | Generates all four |
+| Only some exist | Fails, listing which are present and which are missing |
+
+To regenerate, delete **all four** and run the bootstrap again. Deleting only some of them is refused on purpose: generating just the missing ones would pair a fresh certificate with a stale private key, which does not fail at build time and only surfaces as a rejected SAML signature at login.
+
+`KeycloakPluginSecurityConfig.java` is independent of that set and is skipped on its own if it already exists.
 
 ## Usage Example
 
@@ -374,17 +398,26 @@ mvn test
 
 ### Running Test Applications
 
-Two test applications are provided:
+Two test applications are provided, both under `src/test/java`:
 
-1. **Manual Configuration Test**:
+| Application | What it demonstrates |
+|---|---|
+| `keycloakannotation.SpringKeycloakPluginAnnotationTestApp` | The `@EnableKeycloakPlugin` path. Driven end to end by `SamlLoginFlowTest`. |
+| `keycloakconfig.SpringKeycloakPluginConfigTestApp` | The hand-written security config path, i.e. what `KeycloakRealmBootstrap -DconfigPackage=...` generates. |
+
+`mvn test` exercises them. To start one interactively, run it from your IDE, or from the command
+line:
+
 ```bash
-mvn spring-boot:run -Dstart-class=com.github.wnameless.spring.boot.up.keycloakconfig.SpringKeycloakPluginConfigTestApp
+mvn test-compile dependency:build-classpath -Dmdep.outputFile=target/test-cp.txt
+
+java -cp "target/test-classes:target/classes:$(cat target/test-cp.txt)" \
+  com.github.wnameless.spring.boot.up.keycloakconfig.SpringKeycloakPluginConfigTestApp
 ```
 
-2. **Annotation-based Configuration Test**:
-```bash
-mvn spring-boot:run -Dstart-class=com.github.wnameless.spring.boot.up.keycloakannotation.SpringKeycloakPluginAnnotationTestApp
-```
+`mvn spring-boot:run` does not work for these: the applications live on the test classpath, and
+`mvn exec:java` is bound to `KeycloakRealmBootstrap` by this project's POM, which takes precedence
+over `-Dexec.mainClass`.
 
 ## Troubleshooting
 
