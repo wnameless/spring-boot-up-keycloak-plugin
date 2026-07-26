@@ -15,7 +15,7 @@
      1. 將 [Unreleased] 改為 [x.y.z.w] - YYYY-MM-DD，並在其上方補一個新的空 [Unreleased]
      2. 更新檔案底部的比較連結
      3. 先發行 spring-boot-up-embedded-keycloak，再把本專案 pom.xml 中對它的依賴改成正式版
-     4. mvn clean deploy -Prelease   （會在上傳成功後自動建立並推送 vx.y.z.w tag）
+     4. mvn clean deploy   （會在上傳成功後自動建立並推送 vx.y.z.w tag）
 -->
 
 ## [Unreleased]
@@ -52,8 +52,9 @@ Infinispan 16 與 Liquibase 4.33，而 Spring Boot 的 parent BOM 管理的是�
   而且會隨 artifact 散布給每一個取得它的人
 - ⚠️ **行為變更**：`KeycloakRealmBootstrap` 在 `keycloak-realm.json` 與三個 PEM 檔只有部分存在時，
   改為拋出例外並列出已存在與缺少的檔案。原本會逕行補產生缺少的部分，詳見下方「修復」
-- 發布改用 `mvn clean deploy -Prelease`，新增的 `release` profile 會在上傳成功後自動建立並推送
-  `v${project.version}` tag
+- `mvn deploy` 會在上傳成功後自動建立並推送 `v${project.version}` tag。發布 SNAPSHOT 時以
+  `mvn deploy -DskipTag` 略過。預設為打 tag，是因為兩種失誤的代價不對稱：忘記加旗標會把版本推上
+  Central（無法撤回）卻沒有 tag，而多打一個 SNAPSHOT tag 只需要刪掉
 
 ### 修復
 

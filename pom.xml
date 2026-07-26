@@ -238,10 +238,17 @@
   </build>
 
   <profiles>
-    <!-- Release-only, so a plain `mvn deploy` of a SNAPSHOT cannot create a meaningless tag.
-         Publish with: mvn clean deploy -Prelease -->
+    <!-- Tagging is on by default. Forgetting a flag on a real release would publish to Central,
+         which cannot be undone, and leave no tag behind - the exact failure this is here to
+         prevent. Publishing a SNAPSHOT is the only case that should not be tagged, so that is
+         the case carrying the flag: mvn deploy -DskipTag -->
     <profile>
-      <id>release</id>
+      <id>auto-tag</id>
+      <activation>
+        <property>
+          <name>!skipTag</name>
+        </property>
+      </activation>
       <build>
         <plugins>
           <plugin>
