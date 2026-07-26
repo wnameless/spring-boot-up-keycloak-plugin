@@ -1,15 +1,9 @@
 package com.github.wnameless.spring.boot.up.plugin.keycloak.config;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,6 +29,7 @@ import org.springframework.security.saml2.provider.service.web.authentication.Sa
 import org.springframework.security.web.SecurityFilterChain;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
+import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PemUtils;
 
 /**
  * Default Spring Security configuration for Keycloak SAML2 authentication.
@@ -56,11 +49,15 @@ import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
  *   <li>{@code keycloak.plugin.baseUrl} - Base URL for the application</li>
  *   <li>{@code keycloak.plugin.realmName} - Keycloak realm name (default: webmvc)</li>
  *   <li>{@code keycloak.plugin.clientId} - SAML client ID (default: webmvc-app)</li>
- *   <li>{@code keycloak.plugin.serverCertPem} - Path to Keycloak certificate</li>
- *   <li>{@code keycloak.plugin.appCertPem} - Path to application certificate</li>
- *   <li>{@code keycloak.plugin.appPrivateKeyPem} - Path to application private key</li>
+ *   <li>{@code keycloak.plugin.serverCertPem} - Location of the Keycloak certificate</li>
+ *   <li>{@code keycloak.plugin.appCertPem} - Location of the application certificate</li>
+ *   <li>{@code keycloak.plugin.appPrivateKeyPem} - Location of the application private key</li>
  * </ul>
- * 
+ *
+ * <p>The three PEM locations accept a bare classpath name (the default), an explicit
+ * {@code classpath:} location, or a {@code file:} location. Use {@code file:} to keep private keys
+ * out of the packaged application archive.
+ *
  * @author Wei-Ming Wu
  * @since 1.0.0
  * @see EnableKeycloakPlugin
@@ -183,66 +180,33 @@ public class DefaultKeycloakPluginSecurityConfig {
   }
 
   /**
-   * Loads the Keycloak server X.509 certificate from classpath.
-   * 
+   * Loads the Keycloak server X.509 certificate.
+   *
    * @return the Keycloak server certificate
-   * @throws RuntimeException if certificate cannot be loaded
+   * @throws IllegalStateException if certificate cannot be loaded
    */
   X509Certificate loadKeycloakCert() {
-    Resource keystoreRes = new ClassPathResource(serverCert);
-    try (var localByteArrayInputStream = keystoreRes.getInputStream()) {
-      CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
-      X509Certificate localX509Certificate =
-          (X509Certificate) localCertificateFactory.generateCertificate(localByteArrayInputStream);
-      localByteArrayInputStream.close();
-      return localX509Certificate;
-    } catch (CertificateException | IOException e) {
-      LOG.error("Classpath: " + serverCert + " NOT found", e);
-      throw new RuntimeException(e);
-    }
+    return PemUtils.loadCertificate(serverCert);
   }
 
   /**
-   * Loads the application private key from classpath.
-   * 
+   * Loads the application private key.
+   *
    * @return the application private key
-   * @throws RuntimeException if private key cannot be loaded
+   * @throws IllegalStateException if private key cannot be loaded
    */
   PrivateKey loadWebmvPK() {
-    Resource pkRes = new ClassPathResource(appPK);
-    String pkPem;
-    try {
-      pkPem = new String(pkRes.getInputStream().readAllBytes())
-          .replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
-          .replaceAll("\\s", "");
-      byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(pkPem);
-      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
-      KeyFactory keyFactory = KeyFactory.getInstance("RSA"); // or "EC" for elliptic curve keys
-      return keyFactory.generatePrivate(keySpec);
-    } catch (Exception e) {
-      LOG.error("Classpath: " + appPK + " NOT found", e);
-      throw new RuntimeException(e);
-    }
+    return PemUtils.loadPrivateKey(appPK);
   }
 
   /**
-   * Loads the application X.509 certificate from classpath.
-   * 
+   * Loads the application X.509 certificate.
+   *
    * @return the application certificate
-   * @throws RuntimeException if certificate cannot be loaded
+   * @throws IllegalStateException if certificate cannot be loaded
    */
   X509Certificate loadWebmvCert() {
-    Resource keystoreRes = new ClassPathResource(appCert);
-    try (var localByteArrayInputStream = keystoreRes.getInputStream()) {
-      CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
-      X509Certificate localX509Certificate =
-          (X509Certificate) localCertificateFactory.generateCertificate(localByteArrayInputStream);
-      localByteArrayInputStream.close();
-      return localX509Certificate;
-    } catch (CertificateException | IOException e) {
-      LOG.error("Classpath: " + appCert + " NOT found", e);
-      throw new RuntimeException(e);
-    }
+    return PemUtils.loadCertificate(appCert);
   }
 
   /**

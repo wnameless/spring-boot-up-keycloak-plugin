@@ -1,15 +1,9 @@
 package com.github.wnameless.spring.boot.up.keycloakconfig;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,6 +29,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.EnableEmbeddedKeycloak;
 import com.github.wnameless.spring.boot.up.embedded.keycloak.config.KeycloakServerProperties;
 import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PathUtils;
+import com.github.wnameless.spring.boot.up.plugin.keycloak.utils.PemUtils;
 
 /**
  * Test security configuration for Keycloak SAML2 authentication.
@@ -143,49 +136,18 @@ public class KeycloakPluginSecurityConfig {
     return new InMemoryRelyingPartyRegistrationRepository(registration);
   }
 
+  // The three PEM locations accept a bare classpath name (the default), an explicit classpath:
+  // location, or a file: location. Use file: to keep private keys out of the packaged archive.
   X509Certificate loadKeycloakCert() {
-    Resource keystoreRes = new ClassPathResource(serverCert);
-    try (var localByteArrayInputStream = keystoreRes.getInputStream()) {
-      CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
-      X509Certificate localX509Certificate =
-          (X509Certificate) localCertificateFactory.generateCertificate(localByteArrayInputStream);
-      localByteArrayInputStream.close();
-      return localX509Certificate;
-    } catch (CertificateException | IOException e) {
-      LOG.error("Classpath: " + serverCert + " NOT found", e);
-      throw new RuntimeException(e);
-    }
+    return PemUtils.loadCertificate(serverCert);
   }
 
   PrivateKey loadWebmvPK() {
-    Resource pkRes = new ClassPathResource(appPK);
-    String pkPem;
-    try {
-      pkPem = new String(pkRes.getInputStream().readAllBytes())
-          .replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
-          .replaceAll("\\s", "");
-      byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(pkPem);
-      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
-      KeyFactory keyFactory = KeyFactory.getInstance("RSA"); // or "EC" for elliptic curve keys
-      return keyFactory.generatePrivate(keySpec);
-    } catch (Exception e) {
-      LOG.error("Classpath: " + appPK + " NOT found", e);
-      throw new RuntimeException(e);
-    }
+    return PemUtils.loadPrivateKey(appPK);
   }
 
   X509Certificate loadWebmvCert() {
-    Resource keystoreRes = new ClassPathResource(appCert);
-    try (var localByteArrayInputStream = keystoreRes.getInputStream()) {
-      CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
-      X509Certificate localX509Certificate =
-          (X509Certificate) localCertificateFactory.generateCertificate(localByteArrayInputStream);
-      localByteArrayInputStream.close();
-      return localX509Certificate;
-    } catch (CertificateException | IOException e) {
-      LOG.error("Classpath: " + appCert + " NOT found", e);
-      throw new RuntimeException(e);
-    }
+    return PemUtils.loadCertificate(appCert);
   }
 
   @Lazy
