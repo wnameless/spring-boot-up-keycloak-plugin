@@ -234,47 +234,21 @@
           </excludes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.3.1</version>
+        <configuration>
+          <!-- Matches the tags already in use and the compare links in CHANGELOG.md. The default
+               would be ${artifactId}-${version}, which those links would not find. -->
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <!-- Signing, sources and javadoc are bound unconditionally above, so there is no release
+               profile to activate and no need for the legacy performRelease flag. -->
+          <useReleaseProfile>false</useReleaseProfile>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
-  <profiles>
-    <!-- Tagging is on by default. Forgetting a flag on a real release would publish to Central,
-         which cannot be undone, and leave no tag behind - the exact failure this is here to
-         prevent. Publishing a SNAPSHOT is the only case that should not be tagged, so that is
-         the case carrying the flag: mvn deploy -DskipTag -->
-    <profile>
-      <id>auto-tag</id>
-      <activation>
-        <property>
-          <name>!skipTag</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-scm-plugin</artifactId>
-            <version>2.2.1</version>
-            <configuration>
-              <tag>v${project.version}</tag>
-              <message>Release v${project.version}</message>
-            </configuration>
-            <executions>
-              <execution>
-                <id>tag-release</id>
-                <!-- Bound after central-publishing-maven-plugin within the deploy phase, so a
-                     failed upload never leaves a tag pointing at an unpublished version. The
-                     git provider pushes the tag as part of the goal. -->
-                <phase>deploy</phase>
-                <goals>
-                  <goal>tag</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>

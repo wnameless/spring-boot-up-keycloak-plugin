@@ -11,11 +11,15 @@
 本專案與 [spring-boot-up-embedded-keycloak](https://github.com/wnameless/spring-boot-up-embedded-keycloak)
 版本鎖步發行，兩者請使用相同版號；升級時請一併參閱該專案的更新日誌。
 
-<!-- 發布流程：
-     1. 將 [Unreleased] 改為 [x.y.z.w] - YYYY-MM-DD，並在其上方補一個新的空 [Unreleased]
-     2. 更新檔案底部的比較連結
-     3. 先發行 spring-boot-up-embedded-keycloak，再把本專案 pom.xml 中對它的依賴改成正式版
-     4. mvn clean deploy   （會在上傳成功後自動建立並推送 vx.y.z.w tag）
+<!-- 發布流程（在 main 上執行，且必須在 spring-boot-up-embedded-keycloak 發行完成之後）：
+     1. 上游 mvn clean install 到本機，讓這裡立刻解析得到，不必等 Central 傳播
+     2. 將 pom.xml 中對 spring-boot-up-embedded-keycloak 的依賴改成正式版；commit
+        忘記的話 release:prepare 會直接拒絕，不會發出依賴 SNAPSHOT 的正式版
+     3. 將 [Unreleased] 改為 [x.y.z.w] - YYYY-MM-DD，在其上方補一個新的空 [Unreleased]，
+        並更新檔案底部的比較連結；commit
+     4. git push origin main
+     5. mvn release:prepare release:perform
+     6. main 合回 develop，並把對 embedded 的依賴改回下一個 -SNAPSHOT
 -->
 
 ## [Unreleased]
@@ -55,9 +59,11 @@ Infinispan 16 與 Liquibase 4.33，而 Spring Boot 的 parent BOM 管理的是�
   而且會隨 artifact 散布給每一個取得它的人
 - ⚠️ **行為變更**：`KeycloakRealmBootstrap` 在 `keycloak-realm.json` 與三個 PEM 檔只有部分存在時，
   改為拋出例外並列出已存在與缺少的檔案。原本會逕行補產生缺少的部分，詳見下方「修復」
-- `mvn deploy` 會在上傳成功後自動建立並推送 `v${project.version}` tag。發布 SNAPSHOT 時以
-  `mvn deploy -DskipTag` 略過。預設為打 tag，是因為兩種失誤的代價不對稱：忘記加旗標會把版本推上
-  Central（無法撤回）卻沒有 tag，而多打一個 SNAPSHOT tag 只需要刪掉
+- 發布改用 `maven-release-plugin`（`mvn release:prepare release:perform`），tag 格式為
+  `v${project.version}`。它會自動完成移除 `-SNAPSHOT`、commit、打 tag、改成下一個 `-SNAPSHOT`、
+  commit、推送，然後**從該 tag 的乾淨 checkout 執行 deploy** —— 所以發出去的內容必然等於 tag 的內容，
+  而不是當下工作目錄的內容。`release:prepare` 另外會拒絕帶有 SNAPSHOT 依賴的發行，
+  這正好擋住本專案最容易忘記的那一步
 
 ### 修復
 
