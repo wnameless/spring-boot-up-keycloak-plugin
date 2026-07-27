@@ -24,6 +24,8 @@
 
 ## [Unreleased]
 
+## [26.7.3.0] - 2026-07-27
+
 升級自 24.3.0.0 時請注意：Keycloak 26.7 需要 Hibernate ORM 7、Jakarta Persistence 3.2、
 Infinispan 16 與 Liquibase 4.33，而 Spring Boot 的 parent BOM 管理的是較舊的版本。由於 Maven 的
 `dependencyManagement` 不具傳遞性，**每個使用本函式庫的專案都必須在自己的 `pom.xml` 重複這些 pin**，
@@ -82,5 +84,6 @@ Infinispan 16 與 Liquibase 4.33，而 Spring Boot 的 parent BOM 管理的是�
 第一個採用 `KEYCLOAK.SPRINGBOOT.MAJOR.MINOR` 四段式版號的發行版本，搭配內嵌 Keycloak 24.x。
 此版本之前的變更請參閱 git 歷史。
 
-[Unreleased]: https://github.com/wnameless/spring-boot-up-keycloak-plugin/compare/v24.3.0.0...HEAD
+[Unreleased]: https://github.com/wnameless/spring-boot-up-keycloak-plugin/compare/v26.7.3.0...HEAD
+[26.7.3.0]: https://github.com/wnameless/spring-boot-up-keycloak-plugin/compare/v24.3.0.0...v26.7.3.0
 [24.3.0.0]: https://github.com/wnameless/spring-boot-up-keycloak-plugin/releases/tag/v24.3.0.0
