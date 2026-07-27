@@ -5,6 +5,8 @@
 
 A Spring Boot plugin that provides a standalone authentication solution powered by Embedded Keycloak with SAML2 support.
 
+> **Consider OIDC first.** Since 26.7.3.0, [spring-boot-up-embedded-keycloak](https://github.com/wnameless/spring-boot-up-embedded-keycloak#oidc-login) can log an application in against the Keycloak it hosts, over OIDC, without this plugin. That path needs no X.509 key pair, no realm template, no bootstrap step before startup, and no OpenSAML - which also keeps the Shibboleth repository out of your build. Reach for this plugin when something outside your control requires SAML2.
+
 ## Features
 
 - 🔐 **Embedded Keycloak Server** - No external Keycloak installation required

@@ -27,6 +27,9 @@ Infinispan 16 與 Liquibase 4.33，而 Spring Boot 的 parent BOM 管理的是�
 
 ### 新增
 
+- README 加註：OIDC 登入現在由 spring-boot-up-embedded-keycloak 直接提供，不需要本外掛。
+  本外掛的定位收斂為「非 SAML2 不可」的情境 —— OIDC 那條路不需要 X.509 金鑰對、realm 範本、
+  啟動前的 bootstrap 步驟，也不需要 OpenSAML 與 Shibboleth repository
 - `PemUtils`：集中處理 X.509 憑證與 PKCS#8 私鑰的載入，取代原本散落在預設設定、產生用範本與
   測試設定三處的重複實作
 - `SamlLoginFlowTest`：對內嵌 IdP 執行完整的 SP-initiated SAML 登入流程測試，涵蓋受保護頁面轉址、
