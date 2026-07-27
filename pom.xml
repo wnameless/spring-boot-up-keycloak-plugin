@@ -135,6 +135,45 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Not a real plugin: m2e reads this metadata and never resolves it, and Maven never
+             reaches it because pluginManagement binds nothing. It tells the IDE to run the
+             exec-maven-plugin execution that generates the test realm, which m2e otherwise
+             reports as "Plugin execution not covered by lifecycle configuration" and skips -
+             leaving tests run from the IDE without the fixtures they load from the classpath.
+             This covers VS Code too, whose Java support embeds m2e.
+
+             runOnIncremental is false because the fixtures are only needed when test classes are
+             rebuilt, and generating two RSA key pairs on every keystroke would be absurd. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <versionRange>[3.5.1,)</versionRange>
+                    <goals>
+                      <goal>java</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                      <runOnIncremental>false</runOnIncremental>
+                    </execute>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -220,6 +259,31 @@
             </systemProperty>
           </systemProperties>
         </configuration>
+        <executions>
+          <!-- SamlLoginFlowTest needs a realm and its two key pairs on the test classpath. They
+               are generated here rather than committed, because a key pair belongs to whoever
+               generated it and .gitignore keeps them out on purpose. target/test-classes is wiped
+               by clean, so every build gets a fresh, internally consistent set - and every build
+               exercises KeycloakRealmBootstrap itself, which nothing else does.
+
+               systemProperties is restated in full: an execution inheriting the configPackage
+               above would write a Java source file into src/main/java on every build. -->
+          <execution>
+            <id>generate-test-realm</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <systemProperties>
+                <systemProperty>
+                  <key>targetDir</key>
+                  <value>${project.build.testOutputDirectory}</value>
+                </systemProperty>
+              </systemProperties>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

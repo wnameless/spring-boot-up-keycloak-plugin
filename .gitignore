@@ -1,6 +1,9 @@
 keycloak-realm.json
 *.pem
 *.db
+# maven-release-plugin work files, left behind when a release fails part way through
+pom.xml.releaseBackup
+release.properties
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
